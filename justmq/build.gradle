@@ -1,0 +1,57 @@
+apply plugin: "java"
+apply plugin: "maven"
+apply plugin: "eclipse"
+apply plugin: "war"
+
+dependencies {
+	// https://mvnrepository.com/artifact/org.apache.geronimo.specs/geronimo-jms_1.1_spec
+	compile group: 'org.apache.geronimo.specs', name: 'geronimo-jms_1.1_spec', version: '1.1.1'
+	
+	compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.13'
+	
+	// https://mvnrepository.com/artifact/org.fusesource.hawtbuf/hawtbuf
+	compile group: 'org.fusesource.hawtbuf', name: 'hawtbuf', version: '1.11'
+	
+}
+
+
+version = '1.0-SNAPSHOT'
+group = "com.golden"
+
+tasks.withType(JavaCompile) { options.encoding = "UTF-8" }
+sourceCompatibility = 1.7
+repositories {
+	mavenLocal()
+		   maven {
+			url "http://192.168.1.103:8081/nexus/content/groups/public/"
+			credentials {
+			  username 'admin'
+			  password 'admin123'
+			}
+		}
+	  mavenCentral()
+}
+
+configurations.all {
+	resolutionStrategy.cacheChangingModulesFor  0,'seconds'
+	exclude group: "org.slf4j", module: "slf4j-log4j12"
+}
+
+sourceSets {
+	main {
+		resources {
+		if(!project.hasProperty("profile")){
+        		println "gradle-----本地开发环境-----"
+        	}else{
+        		if(project['profile']=="test"){
+        			println "gradle-----内网开发环境-----"
+        			srcDirs = ["src/main/resources", "src/main/resources_test"]
+        		}
+        		if(project['profile']=="htest"){
+        			println "gradle-----内网测试环境-----"
+        			srcDirs = ["src/main/resources", "src/main/resources_htest"]
+        		}
+        	}
+		}
+	}
+}
